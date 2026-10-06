@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:16
+    environment: { POSTGRES_USER: kicks, POSTGRES_PASSWORD: kicks, POSTGRES_DB: kicks }
+    volumes: ["./backend/sql/init.sql:/docker-entrypoint-initdb.d/init.sql", "pgdata:/var/lib/postgresql/data"]
+  mongo:
+    image: mongo:7
+    volumes: ["mongodata:/data/db"]
+  redis:
+    image: redis:7-alpine
+  api:
+    build: ./backend
+    env_file: ./backend/.env.example
+    environment: { PG_URL: "postgres://kicks:kicks@postgres:5432/kicks", MONGO_URL: "mongodb://mongo:27017/kicks", REDIS_URL: "redis://redis:6379" }
+    ports: ["4000:4000"]
+    depends_on: [postgres, mongo, redis]
+volumes: { pgdata: {}, mongodata: {} }
